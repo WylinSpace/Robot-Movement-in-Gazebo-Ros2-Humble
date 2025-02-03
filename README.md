@@ -15,7 +15,7 @@ It demonstrates the movement and control of a robot within a **Gazebo** simulati
 5. [Simulation in Gazebo](#simulation-in-gazebo)
 6. [Dependencies](#dependencies)
 7. [Future Improvements](#future-improvements)
-8. [License](#license)
+8. [Conclusion](#conclusion)
 
 ---
 
