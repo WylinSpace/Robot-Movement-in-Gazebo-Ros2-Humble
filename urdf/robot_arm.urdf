@@ -1,0 +1,778 @@
+<?xml version="1.0"?>
+<robot name="grp10_robot">
+
+<!-- Material Colors -->
+    <material name="red">
+        <color rgba="1 0 0 1"/>
+    </material>
+    <material name="green">
+        <color rgba="0 1 0 1"/>
+    </material>
+    <material name="blue">
+        <color rgba="0 0 1 1"/>
+    </material>
+    <material name="grey">
+        <color rgba="0.5 0.5 0.5 1"/>
+    </material>
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+
+<!-- Base Link -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <geometry>
+                <box size="0.5 0.5 0.03"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.5 0.5 0.03"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <mass value="14.02"/>
+            <inertia ixx="0.274" ixy="0" ixz="0" iyy="0.274" iyz="0" izz="0.547"/>
+        </inertial>
+    </link>
+
+<!-- IMU -->
+    <link name="imu_link" />
+
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu_link"/>
+        <origin xyz="0.00592786 -0.00041308 0.02422945"/>
+    </joint>
+
+    <gazebo reference="imu_link">
+        <sensor name="imu_sensor" type="imu">
+            <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                <ros>
+                    <namespace>/hyphen_robot</namespace>
+                    <remapping>~/out:=imu</remapping>
+                </ros>
+                <initial_orientation_as_reference>false</initial_orientation_as_reference>
+            </plugin>
+            <always_on>true</always_on>
+            <update_rate>100</update_rate>
+            <visualize>true</visualize>
+            <imu>
+                <angular_velocity>
+                    <x>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>2e-4</stddev>
+                            <bias_mean>0.0000075</bias_mean>
+                            <bias_stddev>0.0000008</bias_stddev>
+                        </noise>
+                    </x>
+                    <y>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>2e-4</stddev>
+                            <bias_mean>0.0000075</bias_mean>
+                            <bias_stddev>0.0000008</bias_stddev>
+                        </noise>
+                    </y>
+                    <z>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>2e-4</stddev>
+                            <bias_mean>0.0000075</bias_mean>
+                            <bias_stddev>0.0000008</bias_stddev>
+                        </noise>
+                    </z>
+                </angular_velocity>
+                <linear_acceleration>
+                    <x>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>1.7e-2</stddev>
+                            <bias_mean>0.1</bias_mean>
+                            <bias_stddev>0.001</bias_stddev>
+                        </noise>
+                    </x>
+                    <y>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>1.7e-2</stddev>
+                            <bias_mean>0.1</bias_mean>
+                            <bias_stddev>0.001</bias_stddev>
+                        </noise>
+                    </y>
+                    <z>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>1.7e-2</stddev>
+                            <bias_mean>0.1</bias_mean>
+                            <bias_stddev>0.001</bias_stddev>
+                        </noise>
+                    </z>
+                </linear_acceleration>
+            </imu>
+        </sensor>
+    </gazebo>
+
+<!-- Front Left Wheel -->
+    <link name="wheel_front_left">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.441"/>
+            <inertia ixx="0.009" ixy="0.0000000008223" ixz="0.0000000001768" iyx="0.0000000008223" iyy="0.009" iyz="0.0000000000141" izx="0.0000000001768" izy="0.0000000000141" izz="0.016"/>
+        </inertial>
+    </link>
+
+    <joint name="left_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_front_left"/>
+        <origin xyz="0.2 0.3 0.065" rpy="-1.5708 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-100" upper="100" effort="200" velocity="1"/>
+    </joint>
+
+<!-- Front Left Motor -->
+    <link name="motor_front_left">
+        <visual>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.949"/>
+            <inertia ixx="0.006" ixy="0.0000000003127" ixz="-0.000000000006939" iyy="0.006" iyz="-0.0002385" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <joint name="motor_front_left_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="motor_front_left"/>
+        <origin xyz="0.2 0.18 0.05" rpy="0 0 0"/>
+    </joint>
+
+<!-- Front Right Wheel -->
+    <link name="wheel_front_right">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.441"/>
+            <inertia ixx="0.009" ixy="0.0000000008223" ixz="0.0000000001768" iyx="0.0000000008223" iyy="0.009" iyz="0.0000000000141" izx="0.0000000001768" izy="0.0000000000141" izz="0.016"/>
+        </inertial>
+    </link>
+
+    <joint name="right_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_front_right"/>
+        <origin xyz="0.2 -0.3 0.065" rpy="-1.5708 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-100" upper="100" effort="200" velocity="1"/>
+    </joint>
+
+<!-- Front Right Motor -->
+    <link name="motor_front_right">
+        <visual>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.949"/>
+            <inertia ixx="0.006" ixy="0.0000000003127" ixz="-0.000000000006939" iyy="0.006" iyz="-0.0002385" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <joint name="motor_front_right_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="motor_front_right"/>
+        <origin xyz="0.2 -0.18 0.05" rpy="0 0 0"/>
+    </joint>
+
+<!-- Rear Left Wheel -->
+    <link name="wheel_rear_left">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.441"/>
+            <inertia ixx="0.009" ixy="0.0000000008223" ixz="0.0000000001768" iyx="0.0000000008223" iyy="0.009" iyz="0.0000000000141" izx="0.0000000001768" izy="0.0000000000141" izz="0.016"/>
+        </inertial>
+    </link>
+
+    <joint name="wheel_rear_left_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_rear_left"/>
+        <origin xyz="-0.2 0.3 0.065" rpy="-1.5708 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-100" upper="100" effort="200" velocity="1"/>
+    </joint>
+
+<!-- Rear Left Motor -->
+    <link name="motor_rear_left">
+        <visual>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.2808 0.06 0.09"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.949"/>
+            <inertia ixx="0.006" ixy="0.0000000003127" ixz="-0.000000000006939" iyy="0.006" iyz="-0.0002385" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <joint name="motor_rear_left_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="motor_rear_left"/>
+        <origin xyz="-0.2 0.18 0.05" rpy="0 0 0"/>
+    </joint>
+
+<!-- Rear Right Wheel -->
+    <link name="wheel_rear_right">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.132" length="0.1"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.441"/>
+            <inertia ixx="0.009" ixy="0.0000000008223" ixz="0.0000000001768" iyx="0.0000000008223" iyy="0.009" iyz="0.0000000000141" izx="0.0000000001768" izy="0.0000000000141" izz="0.016"/>
+        </inertial>
+    </link>
+
+    <joint name="wheel_rear_right_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="wheel_rear_right"/>
+        <origin xyz="-0.2 -0.3 0.065" rpy="-1.5708 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-100" upper="100" effort="200" velocity="1"/>
+    </joint>
+
+<!-- Rear Right Motor -->
+    <link name="motor_rear_right">
+        <visual>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.2808 0.1112 0.09"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.949"/>
+            <inertia ixx="0.006" ixy="0.0000000003127" ixz="-0.000000000006939" iyy="0.006" iyz="-0.0002385" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <joint name="motor_rear_right_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="motor_rear_right"/>
+        <origin xyz="-0.2 -0.18 0.05" rpy="0 0 0"/>
+    </joint>
+
+<!-- Gazebo Diff Drive Plugin -->
+    <gazebo>
+        <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
+            <ros>
+                <namespace>/hyphen_robot_mechanism</namespace>
+            </ros>
+
+            <!-- wheels -->
+            <left_joint>left_wheel_joint</left_joint>
+            <right_joint>right_wheel_joint</right_joint>
+            
+            <!-- kinematics -->
+            <wheel_separation>0.54</wheel_separation>
+            <wheel_diameter>0.065</wheel_diameter>
+
+            <!-- limits -->
+            <max_wheel_torque>20</max_wheel_torque>
+            <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+            <!-- output -->
+            <publish_odom>true</publish_odom>
+            <publish_odom_tf>false</publish_odom_tf>
+            <publish_wheel_tf>true</publish_wheel_tf>
+            
+            <odometry_frame>odom</odometry_frame>
+            <robot_base_frame>base_link</robot_base_frame>
+        </plugin>
+    </gazebo>
+<!-- Upper Arm -->
+    <link name="upper_arm">
+        <visual>
+            <geometry>
+                <cylinder radius="0.09" length="0.479"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.09" length="0.380"/>
+            </geometry>
+        </collision>
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="19.549"/>
+            <inertia ixx="0.291" ixy="0.0" ixz="0.0" iyy="0.29" iyz="0.0" izz="0.058"/>
+        </inertial>
+    </link>
+
+<!-- Upper Arm Joint -->
+    <joint name="base_to_upper_arm" type="continuous">
+        <parent link="base_link"/>
+        <child link="upper_arm"/>
+        <origin xyz="0 0 0.2545" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-1.57" upper="1.57" effort="100" velocity="1"/>
+    </joint>
+
+<!-- Arm Bridge Link -->
+    <link name="arm_bridge">
+        <visual>
+            <geometry>
+                <box size="0.12 0.08 0.058"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.12 0.08 0.043"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.0"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+    </link>
+
+<!-- Upper Arm to Bridge Joint -->
+    <joint name="upper_arm_to_bridge" type="revolute">
+        <parent link="upper_arm"/>
+        <child link="arm_bridge"/>
+        <origin xyz="0 0 0.2105" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.57" upper="1.57" effort="100" velocity="1"/>
+        <dynamics damping="0.05" friction="0.02"/>
+    </joint>
+
+<!-- Forearm -->
+    <link name="forearm">
+        <visual>
+            <geometry>
+                <box size="0.06 0.03 0.570"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.06 0.03 0.570"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
+            <mass value="5.47"/>
+            <inertia ixx="0.004" ixy="0.0" ixz="0.0" iyy="0.114" iyz="0.0" izz="0.113"/>
+        </inertial>
+    </link>
+
+<!-- Bridge to Forearm Joint -->
+    <joint name="bridge_to_forearm" type="fixed">
+        <parent link="arm_bridge"/>
+        <child link="forearm"/>
+        <origin xyz="0.0 0 0.2455" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.57" upper="1.57" effort="100" velocity="1"/>
+    </joint>
+
+<!-- Arm Bridge 02 Link -->
+    <link name="arm_bridge_02">
+        <visual>
+            <geometry>
+                <box size="0.12 0.08 0.07"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.12 0.08 0.10"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="1.0"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+    </link>
+    
+<!-- Forearm to Bridge 02 Joint -->
+    <joint name="forearm_to_bridge_02" type="continuous">
+        <parent link="forearm"/>
+        <child link="arm_bridge_02"/>
+        <origin xyz="0 0 0.25" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.57" upper="1.57" effort="100" velocity="1"/>
+    </joint>
+
+<!-- Palm Joint -->
+    <joint name="bridge_02_to_palm" type="fixed">
+        <parent link="arm_bridge_02"/>
+        <child link="palm"/>
+        <origin xyz="0 0 0.11" rpy="0 0 0"/>
+    </joint>
+
+<!-- Palm Link -->
+    <link name="palm">
+        <visual>
+            <geometry>
+                <cylinder radius="0.042" length="0.255"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.05" length="0.14"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 -1.355" rpy="0.0 0.0 0.0"/>
+            <mass value="3.193"/>
+            <inertia ixx="0.016" ixy="0.0" ixz="0.0" iyy="0.016" iyz="0.0" izz="0.004"/>
+        </inertial>
+    </link>
+
+<!-- Palm Surface Link -->
+    <link name="palm_surface">
+        <visual>
+            <geometry>
+                <box size="0.1218 0.10185 0.0525"/>
+                <!--mesh filename="file:///$(find grp10_robo_arm)/meshes/Puiller.obj"/-->
+            </geometry>
+            <material name="grey">
+                <color rgba="0.5 0.5 0.5 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.1218 0.10185 0.0525"/>
+                <!--mesh filename="file:///$(find grp10_robo_arm)/meshes/Puiller.obj"/-->
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.437"/>
+            <inertia ixx="0.0001" ixy="-0.0000008575" ixz="-0.0000003192" iyy="0.001" iyz="-0.0000001843" izz="0.001"/>
+        </inertial>
+    </link>
+<!-- Palm to Palm Surface Joint -->
+    <joint name="palm_to_surface" type="fixed">
+        <parent link="palm"/>
+        <child link="palm_surface"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+<!-- Gripper Actuator -->
+    <link name="gripper_actuator">
+        <visual>
+            <geometry>
+                <cylinder radius="0.025" length="0.2"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.06" length="0.12"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.128"/>
+            <inertia ixx="0.0003254" ixy="0.0" ixz="0.0" iyy="0.0003254" iyz="0.0" izz="0.00001087"/>
+        </inertial>
+    </link>
+
+<!-- Gripper Actuator Joint (Prismatic) -->
+    <joint name="palm_to_actuator" type="prismatic">
+        <parent link="palm"/>
+        <child link="gripper_actuator"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="0.0" upper="0.05" effort="200" velocity="0.1"/>
+    </joint>
+
+<!-- Finger 1 (Front) -->
+    <link name="finger1">
+        <visual>
+            <origin xyz="0.050347675 0.0 -0.03" rpy="0.0 -0.10 0.0"/>
+            <geometry>
+                <box size="0.2013907 0.035 0.035"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <visual>
+            <origin xyz="0.12 0.0 0.157" rpy="0.0 -0.1 0.0"/>
+            <geometry>
+                <box size="0.035 0.035 0.37241"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <origin xyz="0.050347675 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.10069535 0.035 0.277241"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.727"/>
+            <inertia ixx="0.003" ixy="-0.00000000002674" ixz="-0.002" iyy="0.005" iyz="0.00000000001678" izz="0.002"/>
+        </inertial>
+    </link>
+
+
+<!-- Finger 2 (Right) -->
+    <link name="finger2">
+        <visual>
+            <origin xyz="0.050347675 0.0 0.0" rpy="0.0 -0.30 0.0"/>
+            <geometry>
+                <box size="0.2013907 0.035 0.035"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <visual>
+            <origin xyz="0.0850 0.0 0.157" rpy="0.0 -0.3 0.0"/>
+            <geometry>
+                <box size="0.035 0.035 0.277241"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <origin xyz="0.050347675 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <box size="0.10069535 0.035 0.277241"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.727"/>
+            <inertia ixx="0.003" ixy="-0.00000000002674" ixz="-0.002" iyy="0.005" iyz="0.00000000001678" izz="0.002"/>
+        </inertial>
+    </link>
+
+
+<!-- Finger 3 (Left) -->
+    <link name="finger3">
+        <visual>
+            <origin xyz="0.050347675 0.0 0.0" rpy="0.0 -0.30 0.0"/>
+            <geometry>
+                <box size="0.2013907 0.035 0.035"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <visual>
+            <origin xyz="0.0850 0.0 0.157" rpy="0.0 -0.3 0.0"/>
+            <geometry>
+                <box size="0.035 0.035 0.277241"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <origin xyz="0.050347675 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.10069535 0.035 0.277241"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.727"/>
+            <inertia ixx="0.003" ixy="-0.00000000002674" ixz="-0.002" iyy="0.005" iyz="0.00000000001678" izz="0.002"/>
+        </inertial>
+    </link>
+
+<!-- Finger 1 Joint -->
+    <joint name="surface_to_finger1" type="fixed">
+        <parent link="palm_surface"/>
+        <child link="finger1"/>
+        <origin xyz="0.05 0 0.13" rpy="0 0 0"/> <!-- Adjusted to position the finger above the palm surface -->
+        <axis xyz="0 1 0"/>
+        <limit lower="-0.8" upper="0.8" effort="200" velocity="1"/>
+        <mimic joint="palm_to_actuator" multiplier="10.0"/>
+    </joint>
+
+<!-- Finger 2 Joint -->
+    <joint name="surface_to_finger2" type="fixed">
+        <parent link="palm_surface"/>
+        <child link="finger2"/>
+        <origin xyz="-0.025 0.0866 0.13" rpy="0 0 2.094"/> <!-- Adjusted to position the finger above the palm surface -->
+        <axis xyz="0 1 0"/>
+        <limit lower="-0.8" upper="0.8" effort="200" velocity="1"/>
+        <mimic joint="palm_to_actuator" multiplier="10.0"/>
+    </joint>
+
+<!-- Finger 3 Joint -->
+    <joint name="surface_to_finger3" type="fixed">
+        <parent link="palm_surface"/>
+        <child link="finger3"/>
+        <origin xyz="-0.025 -0.0866 0.13" rpy="0 0 -2.094"/> <!-- Adjusted to position the finger above the palm surface -->
+        <axis xyz="0 1 0"/>
+        <limit lower="-0.8" upper="0.8" effort="200" velocity="1"/>
+        <mimic joint="palm_to_actuator" multiplier="10.0"/>
+    </joint>
+
+
+<!-- Camera -->
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.02495 0.0899 0.02495"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.02495 0.0899 0.02495"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.1"/>
+            <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+        </inertial>
+    </link>
+
+    <joint name="palm_to_camera" type="fixed">
+        <parent link="palm"/>
+        <child link="camera_link"/>
+        <origin xyz="0.19 0 0.01" rpy="0 1.571 0"/>
+    </joint>
+
+<!-- Depth Camera -->
+    <link name="camera_depth_frame"/>
+
+    <joint name="camera_depth_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        <parent link="camera_link"/>
+        <child link="camera_depth_frame"/>
+    </joint>
+
+    <gazebo reference="camera_link">
+        <sensor name="depth_camera" type="depth">
+            <visualize>true</visualize>
+            <update_rate>30.0</update_rate>
+            <camera name="camera">
+                <horizontal_fov>1.047198</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.05</near>
+                    <far>3</far>
+                </clip>
+            </camera>
+            <plugin name="depth_camera_controller" filename="libgazebo_ros_camera.so">
+                <baseline>0.2</baseline>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>0.0</updateRate>
+                <frame_name>camera_depth_frame</frame_name>
+                <pointCloudCutoff>0.5</pointCloudCutoff>
+                <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+                <distortionK1>0</distortionK1>
+                <distortionK2>0</distortionK2>
+                <distortionK3>0</distortionK3>
+                <distortionT1>0</distortionT1>
+                <distortionT2>0</distortionT2>
+                <CxPrime>0</CxPrime>
+                <Cx>0</Cx>
+                <Cy>0</Cy>
+                <focalLength>0</focalLength>
+                <hackBaseline>0</hackBaseline>
+            </plugin>
+        </sensor>
+    </gazebo>
+
+
+
+</robot>
+

@@ -1,0 +1,789 @@
+<?xml version="1.0"?>
+<robot name="hyphen_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!-- Material Colors -->
+        <material name="red">
+            <color rgba="1 0 0 1"/>
+        </material>
+
+        <material name="green">
+            <color rgba="0 1 0 1"/>
+        </material>
+
+        <material name="blue">
+            <color rgba="0 0 1 1"/>
+        </material>
+
+        <material name="yellow">
+            <color rgba="1 1 0 1"/>
+        </material>
+
+        <material name="purple">
+            <color rgba="0 1 1 1"/>
+        </material>
+
+<!-- Base Link -->
+    <link name="base_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+        <mass value="0.26840318"/>
+        <inertia ixx="0.00073518" ixy="1e-8" ixz="0.0000243" iyy="0.00132193" iyz="-9.596e-10" izz="0.0020481"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <geometry>
+                <!-- <box size="0.23 0.21 0.005"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/Base.obj"/>
+            </geometry>
+            <material name="red" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <geometry>
+                <!-- <box size="0.23 0.21 0.005"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/Base.obj"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Camera Mount -->
+    <link name="camera_mount_link">
+        <!-- <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.025 0.04 0.02"/>
+            </geometry>
+            <material name="blue" />
+        </visual> -->
+
+        <!-- <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.025 0.04 0.02"/>
+            </geometry>
+        </collision> -->
+    </link>
+
+    <!-- Camera Mount joint -->
+    <joint name="camera_mount_joint" type="fixed">
+        <origin xyz="0.0925 0.0 0.0125" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="camera_mount_link"/>
+    </joint>
+
+    <!-- Camera -->
+    <link name="camera_link">
+        <sensor name="camera" type="camera">
+            <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+                <width>640</width>
+                <height>480</height>
+                <format>R8G8B8</format>
+            </image>
+            <clip>
+                <near>0.1</near>
+                <far>100</far>
+            </clip>
+            </camera>
+            <update_rate>30</update_rate>
+            <pose>0 0 0.1 0 0 0</pose>
+        </sensor>
+        <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+        </noise>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.01984"/>
+            <inertia ixx="0.00001439" ixy="0.0" ixz="0.0" iyy="0.00000206" iyz="0.0" izz="0.00001439"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="1.571 0.0 1.571"/>
+            <geometry>
+                <!-- <box size="0.02495 0.0899 0.02495"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/D435i_Solid.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="yellow" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.02495 0.0899 0.02495"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Camera joint -->
+    <joint name="camera_joint" type="fixed">
+        <origin xyz="0 0 0.022475" rpy="0.0 0.0 0.0"/>
+        <parent link="camera_mount_link"/>
+        <child link="camera_link"/>
+            <!-- Depth Camera -->
+        <link name="camera_depth_frame"/>
+
+        <joint name="camera_depth_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+            <parent link="camera_link"/>
+            <child link="camera_depth_frame"/>
+        </joint>
+
+        <gazebo reference="camera_link">
+            <sensor name="depth_camera" type="depth">
+                <visualize>true</visualize>
+                <update_rate>30.0</update_rate>
+                <camera name="camera">
+                    <horizontal_fov>1.047198</horizontal_fov>
+                    <image>
+                        <width>640</width>
+                        <height>480</height>
+                        <format>R8G8B8</format>
+                    </image>
+                    <clip>
+                        <near>0.05</near>
+                        <far>3</far>
+                    </clip>
+                </camera>
+                <plugin name="depth_camera_controller" filename="libgazebo_ros_camera.so">
+                    <baseline>0.2</baseline>
+                    <alwaysOn>true</alwaysOn>
+                    <updateRate>0.0</updateRate>
+                    <frame_name>camera_depth_frame</frame_name>
+                    <pointCloudCutoff>0.5</pointCloudCutoff>
+                    <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+                    <distortionK1>0</distortionK1>
+                    <distortionK2>0</distortionK2>
+                    <distortionK3>0</distortionK3>
+                    <distortionT1>0</distortionT1>
+                    <distortionT2>0</distortionT2>
+                    <CxPrime>0</CxPrime>
+                    <Cx>0</Cx>
+                    <Cy>0</Cy>
+                    <focalLength>0</focalLength>
+                    <hackBaseline>0</hackBaseline>
+                </plugin>
+            </sensor>
+        </gazebo>
+            <!-- IMU -->
+        <link name="imu_link" />
+
+        <joint name="imu_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="imu_link"/>
+            <origin xyz="0.00592786 -0.00041308 0.02422945"/>
+        </joint>
+
+        <gazebo reference="imu_link">
+            <sensor name="imu_sensor" type="imu">
+                <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                    <ros>
+                        <namespace>/hyphen_robot</namespace>
+                        <remapping>~/out:=imu</remapping>
+                    </ros>
+                    <initial_orientation_as_reference>false</initial_orientation_as_reference>
+                </plugin>
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <visualize>true</visualize>
+                <imu>
+                    <angular_velocity>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-4</stddev>
+                                <bias_mean>0.0000075</bias_mean>
+                                <bias_stddev>0.0000008</bias_stddev>
+                            </noise>
+                        </x>
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-4</stddev>
+                                <bias_mean>0.0000075</bias_mean>
+                                <bias_stddev>0.0000008</bias_stddev>
+                            </noise>
+                        </y>
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-4</stddev>
+                                <bias_mean>0.0000075</bias_mean>
+                                <bias_stddev>0.0000008</bias_stddev>
+                            </noise>
+                        </z>
+                    </angular_velocity>
+                    <linear_acceleration>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                                <bias_mean>0.1</bias_mean>
+                                <bias_stddev>0.001</bias_stddev>
+                            </noise>
+                        </x>
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                                <bias_mean>0.1</bias_mean>
+                                <bias_stddev>0.001</bias_stddev>
+                            </noise>
+                        </y>
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                                <bias_mean>0.1</bias_mean>
+                                <bias_stddev>0.001</bias_stddev>
+                            </noise>
+                        </z>
+                    </linear_acceleration>
+                </imu>
+            </sensor>
+        </gazebo>
+    </joint>
+
+    <!-- Left Wheel Motor -->
+    <link name="left_wheel_motor_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.032"/>
+            <inertia ixx="0.00000341" ixy="0.0" ixz="0.0" iyy="0.00001449" iyz="0.0" izz="0.0000152"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 -1.571 -1.571"/>
+            <geometry>
+                <!-- <box size="0.0702 0.0278 0.0225"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/tt_motor.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="yellow" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.0702 0.0278 0.0225"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left wheel motor joint -->
+    <joint name="left_wheel_motor_joint" type="fixed">
+        <origin xyz="-0.01868 0.0611 0.01375" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="left_wheel_motor_link"/>
+    </joint>
+
+    <!-- Right Wheel Motor -->
+     <link name="right_wheel_motor_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.032"/>
+            <inertia ixx="0.00000341" ixy="0.0" ixz="0.0" iyy="0.00001449" iyz="0.0" izz="0.0000152"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0 1.571 -1.571"/>
+            <geometry>
+                <!-- <box size="0.0702 0.0278 0.0225"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/tt_motor.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="yellow" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.0702 0.0278 0.0225"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Right wheel motor joint -->
+    <joint name="right_wheel_motor_joint" type="fixed">
+        <origin xyz="-0.01868 -0.0611 0.01375" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="right_wheel_motor_link"/>
+    </joint>
+
+    <!-- Gazebo Diff Drive Plugin -->
+        <gazebo>
+            <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
+                <ros>
+                    <namespace>/hyphen_robot</namespace>
+                </ros>
+
+                <!-- wheels -->
+                <left_joint>left_wheel_joint</left_joint>
+                <right_joint>right_wheel_joint</right_joint>
+
+                <!-- kinematics -->
+                <wheel_separation>0.064</wheel_separation>
+                <wheel_diameter>0.066</wheel_diameter>
+
+                <!-- limits -->
+                <max_wheel_torque>20</max_wheel_torque>
+                <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+                <!-- output -->
+                <publish_odom>true</publish_odom>
+                <publish_odom_tf>false</publish_odom_tf>
+                <publish_wheel_tf>true</publish_wheel_tf>
+
+                <odometry_frame>odom</odometry_frame>
+                <robot_base_frame>base_link</robot_base_frame>
+            </plugin>
+        </gazebo>
+
+<!-- TT Wheels -->
+    <!-- Left Wheel -->
+    <link name="left_wheel_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.034"/>
+            <inertia ixx="0.00001103" ixy="0.0" ixz="0.0" iyy="0.00001851" iyz="0.0" izz="0.00001103"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 3.14 0.0"/>
+            <geometry>
+                <!-- <cylinder radius="0.033" length="0.025"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/wheel.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.033" length="0.025"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left wheel joint -->
+    <joint name="left_wheel_joint" type="continuous">
+        <origin xyz="0.0189 0.032 0" rpy="1.570796 0.0 0.0"/>
+        <parent link="left_wheel_motor_link"/>
+        <child link="left_wheel_link"/>
+         <axis xyz="0.0 0.0 1.0"/>
+    </joint>
+
+    <!-- Right Wheel -->
+    <link name="right_wheel_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.034"/>
+        <inertia ixx="0.00001103" ixy="0.0" ixz="0.0" iyy="0.00001851" iyz="0.0" izz="0.00001103"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <!-- <cylinder radius="0.033" length="0.025"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/wheel.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.033" length="0.025"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Right wheel joint -->
+    <joint name="right_wheel_joint" type="continuous">
+        <origin xyz="0.0189 -0.032 0" rpy="1.570796 0.0 0.0"/>
+        <parent link="right_wheel_motor_link"/>
+        <child link="right_wheel_link"/>
+         <axis xyz="0.0 0.0 1.0"/>
+    </joint>
+
+    <!-- Front Caster Wheel -->
+    <link name="front_caster_wheel_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.2"/>
+            <inertia ixx="5.12e-6" ixy="0.0" ixz="0.0" iyy="5.12e-6" iyz="0.0" izz="5.12e-6"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <geometry>
+                <!-- <sphere radius="0.007"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/ball_caster.obj" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.008"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Front caster wheel joint -->
+    <joint name="front_caster_wheel_joint" type="fixed">
+        <origin xyz="0.105 0 -0.0095" rpy="1.570796 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="front_caster_wheel_link"/>
+    </joint>
+
+     <!-- Rear Caster Wheel -->
+     <link name="rear_caster_wheel_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.2"/>
+            <inertia ixx="5.12e-6" ixy="0.0" ixz="0.0" iyy="5.12e-6" iyz="0.0" izz="5.12e-6"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 3.14"/>
+            <geometry>
+                <!-- <sphere radius="0.007"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/ball_caster.obj" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <sphere radius="0.008"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Front caster wheel joint -->
+    <joint name="rear_caster_wheel_joint" type="fixed">
+        <origin xyz="-0.105 0 -0.0095" rpy="1.570796 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="rear_caster_wheel_link"/>
+    </joint>
+
+<!-- Robot Mechanism -->
+
+    <!-- Flywheel Mount Left-->
+    <link name="left_flywheel_mount_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.144"/>
+            <inertia ixx="0.00008293" ixy="0.0" ixz="0.0" iyy="0.00011969" iyz="0.0" izz="0.00004942"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0.0 0.0 -1.571"/>
+            <geometry>
+                <!-- <box size="0.06 0.023 0.08"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/flywheel_mount.obj" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.06 0.023 0.08"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left Flywheel Mount joint -->
+    <joint name="left_flywheel_mount_joint" type="fixed">
+        <origin xyz="-0.085 0.0535 0.0425" rpy="0 0.0 0.0"/>
+        <parent link="base_link" />
+        <child link="left_flywheel_mount_link"/>
+    </joint>
+
+    <!-- Flywheel Mount Right -->
+    <link name="right_flywheel_mount_link">
+        <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <mass value="0.144"/>
+                <inertia ixx="0.00008293" ixy="0.0" ixz="0.0" iyy="0.00011969" iyz="0.0" izz="0.00004942"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0.0 0.0 -1.571"/>
+                <geometry>
+                <!-- <box size="0.06 0.023 0.08"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/flywheel_mount.obj" />
+            </geometry>
+            <material name="purple" />
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.06 0.023 0.08"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left Flywheel Mount joint -->
+    <joint name="right_flywheel_mount_joint" type="fixed">
+        <origin xyz="-0.085 -0.0535 0.0425" rpy="0 0.0 0.0"/>
+        <parent link="base_link" />
+        <child link="right_flywheel_mount_link"/>
+    </joint>
+
+<!-- Flywheels -->
+    <!-- Left Flywheel -->
+    <link name="left_flywheel_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.034"/>
+        <inertia ixx="0.00001103" ixy="0.0" ixz="0.0" iyy="0.00001851" iyz="0.0" izz="0.00001103"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="3.14 0.0 0.0"/>
+            <geometry>
+                <!--<cylinder radius="0.033" length="0.025"/>-->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/wheel.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="red" />
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0.0 0 0"/>
+            <geometry>
+                <cylinder radius="0.033" length="0.025"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left Flywheel joint -->
+    <joint name="left_flywheel_joint" type="continuous">
+        <origin xyz="-0.06379 0 -0.05" rpy="0 0.0 0.0"/>
+        <parent link="left_flywheel_motor_mount_link" />
+        <child link="left_flywheel_link"/>
+        <axis xyz="0.0 0.0 1.0"/>
+    </joint>
+
+    <!-- Right Flywheel -->
+    <link name="right_flywheel_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.034"/>
+        <inertia ixx="0.00001103" ixy="0.0" ixz="0.0" iyy="0.00001851" iyz="0.0" izz="0.00001103"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="3.14 0.0 0.0"/>
+            <geometry>
+                <!-- <cylinder radius="0.033" length="0.025"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/wheel.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="red" />
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0.0 0 0"/>
+            <geometry>
+                <!--cylinder radius="0.020" length="0.020"/-->
+                <box size="0.05 0.05 0.005"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Right Flywheel Mount joint -->
+    <joint name="right_flywheel_joint" type="continuous">
+        <origin xyz="-0.06379 0 -0.05" rpy="0 0.0 0.0"/>
+        <parent link="right_flywheel_motor_mount_link" />
+        <child link="right_flywheel_link"/>
+        <axis xyz="0.0 0.0 -1.0"/>
+    </joint>
+
+<!-- Gazebo Diff Drive Plugin -->
+        <gazebo>
+            <plugin name='diff_drive_1' filename='libgazebo_ros_diff_drive.so'>
+                <ros>
+                    <namespace>/hyphen_robot_mechanism</namespace>
+                </ros>
+
+                <!-- wheels -->
+                <left_joint>left_flywheel_joint</left_joint>
+                <right_joint>right_flywheel_joint</right_joint>
+
+                <!-- kinematics -->
+                <wheel_separation>0.107</wheel_separation>
+                <wheel_diameter>0.066</wheel_diameter>
+
+                <!-- limits -->
+                <max_wheel_torque>20</max_wheel_torque>
+                <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+                <!-- output -->
+                <publish_odom>false</publish_odom>
+                <publish_odom_tf>false</publish_odom_tf>
+                <publish_wheel_tf>true</publish_wheel_tf>
+
+                <odometry_frame>odom</odometry_frame>
+                <robot_base_frame>base_link</robot_base_frame>
+            </plugin>
+        </gazebo>
+
+<!-- Flywheel Motor mounts -->
+    <!-- Motor Mount left -->
+    <link name="left_flywheel_motor_mount_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.076"/>
+            <inertia ixx="0.000009771" ixy="0.0" ixz="0.0" iyy="0.00004701" iyz="0.0" izz="0.00004396"/>
+        </inertial>
+        <visual>
+            <origin xyz="-0.043 0 -0.0159" rpy="0.0 -0.349 3.14"/>
+            <geometry>
+                <!-- <box size="0.08 0.023 0.0318"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/flywheel_motor.obj" />
+            </geometry>
+            <material name="red" />
+        </visual>
+
+        <collision>
+            <origin xyz="-0.04 0 -0.0159" rpy="0.0 0 0"/>
+            <geometry>
+                <box size="0.08 0.023 0.0318"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left Flywheel Mount joint -->
+    <joint name="left_flywheel_motor_mount_joint" type="fixed">
+        <origin xyz="-0.03 0 0.04" rpy="0 -0.349 0.0"/>
+        <parent link="left_flywheel_mount_link" />
+        <child link="left_flywheel_motor_mount_link"/>
+    </joint>
+
+    <!-- Motor Mount Right -->
+    <link name="right_flywheel_motor_mount_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <mass value="0.076"/>
+            <inertia ixx="0.000009771" ixy="0.0" ixz="0.0" iyy="0.00004701" iyz="0.0" izz="0.00004396"/>
+        </inertial>
+        <visual>
+           <origin xyz="-0.043 0 -0.0159" rpy="0.0 -0.349 3.14"/>
+            <geometry>
+                <!-- <box size="0.08 0.023 0.0318"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/flywheel_motor.obj" />
+            </geometry>
+            <material name="red" />
+        </visual>
+
+        <collision>
+            <origin xyz="-0.04 0 -0.0159" rpy="0.0 0 0"/>
+            <geometry>
+                <box size="0.08 0.023 0.0318"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left Flywheel Mount joint -->
+    <joint name="right_flywheel_motor_mount_joint" type="fixed">
+        <origin xyz="-0.03 0 0.04" rpy="0 -0.349 0.0"/>
+        <parent link="right_flywheel_mount_link" />
+        <child link="right_flywheel_motor_mount_link"/>
+    </joint>
+
+
+
+    <!-- Rail support structure -->
+    <link name="rail_support_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.113"/>
+        <inertia ixx="0.00004408" ixy="0.0" ixz="0.0" iyy="0.00004555" iyz="0.0" izz="0.00002859"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0.0 0 -1.571"/>
+            <geometry>
+                <!-- <box size="0.04 0.038 0.0975"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/rail_support.obj" />
+            </geometry>
+            <material name="blue" />
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 -0.015" rpy="0.0 0 -1.571"/>
+            <geometry>
+                <box size="0.04 0.038 0.057"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Rail support joint -->
+    <joint name="rail_support_joint" type="fixed">
+        <origin xyz="0.0187 0 0.04875" rpy="0 0.0 0.0"/>
+        <axis xyz="0.0 0.0 1.0"/>
+        <parent link="base_link" />
+        <child link="rail_support_link"/>
+    </joint>
+
+<!-- Rail guides -->
+    <!-- Left Rail support structure -->
+    <link name="left_rail_guide_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.083"/>
+        <inertia ixx="6.7e-7" ixy="-1.9e-7" ixz="0.0" iyy="0.00031763" iyz="0.0" izz="0.00031763"/>
+        </inertial>
+        <visual>
+            <origin xyz="-0.004 0 -0.02" rpy="-1.571 1.571 0"/>
+            <geometry>
+                <!-- <cylinder radius="0.004" length="0.223"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/rail_guide.obj" />
+            </geometry>
+            <material name="blue" />
+        </visual>
+
+        <collision>
+            <origin xyz="-0.004 0 -0.02" rpy="-1.571 1.571 0"/>
+            <geometry>
+                <!-- <cylinder radius="0.004" length="0.223"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/rail_guide.obj" />
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left rail guide joint -->
+    <joint name="left_rail_guide_joint" type="fixed">
+        <origin xyz="-0.115 0.015 0.0025" rpy="0 1.0472 0.0"/>
+        <axis xyz="0.0 0.0 1.0"/>
+        <parent link="base_link" />
+        <child link="left_rail_guide_link"/>
+    </joint>
+
+    <!-- Right Rail support structure -->
+    <link name="right_rail_guide_link">
+        <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.083"/>
+        <inertia ixx="6.7e-7" ixy="-1.9e-7" ixz="0.0" iyy="0.00031763" iyz="0.0" izz="0.00031763"/>
+        </inertial>
+        <visual>
+            <origin xyz="-0.004 0 -0.02" rpy="-1.571 1.571 0"/>
+            <geometry>
+                <!-- <cylinder radius="0.004" length="0.223"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/rail_guide.obj" />
+            </geometry>
+            <material name="blue" />
+        </visual>
+
+        <collision>
+            <origin xyz="-0.004 0 -0.02" rpy="-1.571 1.571 0"/>
+            <geometry>
+                <!-- <cylinder radius="0.004" length="0.223"/> -->
+                <mesh filename="file:///$(find hyphen_robot_description)/meshes/rail_guide.obj" />
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left rail guide joint -->
+    <joint name="right_rail_guide_joint" type="fixed">
+        <origin xyz="-0.115 -0.015 0.0025" rpy="0 1.0472 0.0"/>
+        <axis xyz="0.0 0.0 1.0"/>
+        <parent link="base_link" />
+        <child link="right_rail_guide_link"/>
+    </joint>
+</robot>
